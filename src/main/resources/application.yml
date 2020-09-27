@@ -1,0 +1,54 @@
+#################################### common config : ####################################
+spring:
+  application:
+    name: gather
+  datasource:
+    url: jdbc:mysql://adev.top:3306/adev-gather?serverTimezone=UTC
+    username: root
+    password: 239ea79e9e2a61df
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update #important! Don't change!
+      use-new-id-generator-mappings: true
+    show-sql: false
+  redis:
+    host: adev.top
+    port: 6379
+    password: adev.top
+  data:
+    mongodb:
+      uri: mongodb://admin:adev.top@adev.top:27017/adev_gather
+  main:
+    allow-bean-definition-overriding: true
+# 应用服务web访问端口
+server:
+  port: 8090
+
+# eureka客户端配置
+eureka:
+  instance:
+    # 使用 ip 代替实例名
+    prefer-ip-address: true
+    # 实例的主机名
+    hostname: ${spring.cloud.client.ip-address}
+    # 实例的 ID 规则
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+  client:
+    serviceUrl:
+      # 注册中心地址
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka/
+
+#定于交易所信息
+subscribe:
+  exchanges[0]:
+    name: coinone
+    class-name: com.adev.gather.exchange.coinone.CoinoneStreamingExchange
+  exchanges[1]:
+    name: bitbank
+    class-name: com.adev.gather.exchange.bitbank.BitbankStreamingExchange
+  exchanges[2]:
+    name: kraken
+    class-name: com.adev.gather.exchange.kraken.KrakenStreamingExchange
+
+      
