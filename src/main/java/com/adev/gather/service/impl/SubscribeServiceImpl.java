@@ -1,17 +1,17 @@
 package com.adev.gather.service.impl;
 
-import com.adev.common.base.domian.CoinPairBase;
 import com.adev.common.base.domian.Kline;
 import com.adev.common.base.domian.Ticker;
 import com.adev.common.base.domian.Trade;
-import com.adev.common.base.enums.Enums;
 import com.adev.common.exchange.StreamingExchange;
 import com.adev.common.exchange.StreamingExchangeFactory;
 import com.adev.gather.config.SubscribeConfig;
 import com.adev.gather.domain.CurrencyPair;
+import com.adev.gather.domain.KlineHistory;
 import com.adev.gather.domain.PairTicker;
 import com.adev.gather.domain.TradeHistory;
 import com.adev.gather.repository.CurrencyPairRepository;
+import com.adev.gather.repository.KlineHistoryRepository;
 import com.adev.gather.repository.TickerRepository;
 import com.adev.gather.repository.TradeHistoryRepository;
 import com.adev.gather.service.SubscribeService;
@@ -31,6 +31,9 @@ public class SubscribeServiceImpl implements SubscribeService {
 
     @Autowired
     private TradeHistoryRepository tradeHistoryRepository;
+
+    @Autowired
+    private KlineHistoryRepository klineHistoryRepository;
 
     @Override
     public void subscribe(SubscribeConfig.SubscribeExchange exchange) {
@@ -79,6 +82,10 @@ public class SubscribeServiceImpl implements SubscribeService {
     }
 
     private void handleKline(Kline kline){
-        System.out.println(kline);
+        KlineHistory klineHistory=klineHistoryRepository.findFirstByExchangeAndCurrencyPairAndTimestamp(kline.getExchange(),kline.getCurrencyPair(),kline.getTimestamp());
+        if(null==klineHistory){
+            klineHistory=new KlineHistory(kline);
+            klineHistoryRepository.save(klineHistory);
+        }
     }
 }

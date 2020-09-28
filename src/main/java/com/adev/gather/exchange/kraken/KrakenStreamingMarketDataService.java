@@ -117,8 +117,10 @@ public class KrakenStreamingMarketDataService implements StreamingMarketDataServ
             if(null!=klineListNode) {
                 for (JsonNode klineNode : klineListNode) {
                     Kline kline=new Kline();
+                    kline.setExchange("kraken");
+                    kline.setCurrencyPair(currencyPair);
                     ArrayNode klineNodeArray=(ArrayNode)klineNode;
-                    kline.setTimestamp(DataUtils.objToLong(klineNodeArray.get(0)));
+                    kline.setTimestamp(DataUtils.objToLong(klineNodeArray.get(0))*1000);
                     kline.setOpen(DataUtils.objToBigDecimal(klineNodeArray.get(1)));
                     kline.setHigh(DataUtils.objToBigDecimal(klineNodeArray.get(2)));
                     kline.setLow(DataUtils.objToBigDecimal(klineNodeArray.get(3)));

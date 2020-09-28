@@ -101,22 +101,25 @@ public class BitbankStreamingMarketDataService implements StreamingMarketDataSer
             if("1".equalsIgnoreCase(successCode)) {
                 JsonNode dataNode=jsonNode.get("data");
                 if(null!=dataNode){
-                    JsonNode candlestickNode=dataNode.get("candlestick");
-                    if(null!=candlestickNode){
-                        ArrayNode ohlcvArray=(ArrayNode)candlestickNode.get("ohlcv");
-                        if(null!=ohlcvArray){
-                            for (JsonNode ohlcvItem:ohlcvArray){
-                                ArrayNode ohlcvItemArray=(ArrayNode)ohlcvItem;
-                                Kline kline=new Kline();
-                                kline.setExchange("bitbank");
-                                kline.setCurrencyPair(currencyPair);
-                                kline.setOpen(DataUtils.objToBigDecimal(ohlcvItemArray.get(0)));
-                                kline.setHigh(DataUtils.objToBigDecimal(ohlcvItemArray.get(1)));
-                                kline.setLow(DataUtils.objToBigDecimal(ohlcvItemArray.get(2)));
-                                kline.setLast(DataUtils.objToBigDecimal(ohlcvItemArray.get(3)));
-                                kline.setOriginalAmount(DataUtils.objToBigDecimal(ohlcvItemArray.get(4)));
-                                kline.setTimestamp(DataUtils.objToLong(ohlcvItemArray.get(5)));
-                                klineList.add(kline);
+                    ArrayNode candlestickArrayNode=(ArrayNode)dataNode.get("candlestick");
+                    if(null!=candlestickArrayNode){
+                        JsonNode candlestickNode=candlestickArrayNode.get(0);
+                        if(null!=candlestickNode){
+                            ArrayNode ohlcvArray=(ArrayNode)candlestickNode.get("ohlcv");
+                            if(null!=ohlcvArray){
+                                for (JsonNode ohlcvItem:ohlcvArray){
+                                    ArrayNode ohlcvItemArray=(ArrayNode)ohlcvItem;
+                                    Kline kline=new Kline();
+                                    kline.setExchange("bitbank");
+                                    kline.setCurrencyPair(currencyPair);
+                                    kline.setOpen(DataUtils.objToBigDecimal(ohlcvItemArray.get(0)));
+                                    kline.setHigh(DataUtils.objToBigDecimal(ohlcvItemArray.get(1)));
+                                    kline.setLow(DataUtils.objToBigDecimal(ohlcvItemArray.get(2)));
+                                    kline.setLast(DataUtils.objToBigDecimal(ohlcvItemArray.get(3)));
+                                    kline.setOriginalAmount(DataUtils.objToBigDecimal(ohlcvItemArray.get(4)));
+                                    kline.setTimestamp(DataUtils.objToLong(ohlcvItemArray.get(5)));
+                                    klineList.add(kline);
+                                }
                             }
                         }
                     }

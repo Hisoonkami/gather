@@ -142,6 +142,8 @@ public class CoinoneStreamingMarketDataService implements StreamingMarketDataSer
                 if(null!=dataArrayNode){
                     for (JsonNode dataNode:dataArrayNode){
                         Kline kline=new Kline();
+                        kline.setExchange("coinone");
+                        kline.setCurrencyPair(currencyPair);
                         kline.setTimestamp(DataUtils.objToLong(dataNode.get("DT")));
                         kline.setOpen(DataUtils.objToBigDecimal(dataNode.get("Open")));
                         kline.setLow(DataUtils.objToBigDecimal(dataNode.get("Low")));
