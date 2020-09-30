@@ -1,6 +1,6 @@
 package com.adev.gather.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.adev.common.base.domian.EntityBase;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedBy;
@@ -18,11 +18,7 @@ import java.util.Date;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
-public class Currency {
-    @Version
-    @JsonIgnore
-    private Long version;
-
+public class Currency extends EntityBase {
     @Id
     @GeneratedValue
     private Long id;

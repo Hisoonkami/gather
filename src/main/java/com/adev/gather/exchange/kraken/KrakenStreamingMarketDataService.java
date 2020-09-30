@@ -1,9 +1,6 @@
 package com.adev.gather.exchange.kraken;
 
-import com.adev.common.base.domian.Kline;
-import com.adev.common.base.domian.OrderBook;
-import com.adev.common.base.domian.Ticker;
-import com.adev.common.base.domian.Trade;
+import com.adev.common.base.domian.*;
 import com.adev.common.base.utils.DataUtils;
 import com.adev.common.exchange.StreamingMarketDataService;
 import com.adev.common.exchange.exception.NotYetImplementedForExchangeException;
@@ -138,8 +135,60 @@ public class KrakenStreamingMarketDataService implements StreamingMarketDataServ
         throw new NotYetImplementedForExchangeException();
     }
 
+    // API: https://www.kraken.com/help/api#get-ticker-info
+    // 请求示例 ： https://api.kraken.com/0/public/Depth?pair=ETCETH&count=500
+    // 返回格式 ： { "error":[ ], "result":{ "XETCXETH":{ "asks":[ [ "0.04793900",
+    // "750.980", 1539160918 ]],"bids":[ [ "0.04763000", "7.565", 1539160938
+    // ]]}}}
     @Override
     public Observable<OrderBook> getOrderBook(String currencyPair, Object... args) {
-        return null;
+        String pair=currencyPair.replace("-","");
+        String url="https://api.kraken.com/0/public/Depth?pair="+pair+"&count=20";
+        RequestParam requestParam=new RequestParam();
+        requestParam.setUrl(url);
+        return httpStreamingService.pollingRestApi(requestParam).map(s->{
+            OrderBook orderBook=new OrderBook();
+            JsonNode jsonNode = mapper.readTree(s);
+            orderBook.setExchange("kraken");
+            orderBook.setCurrencyPair(currencyPair);
+            JsonNode orderBookNode = jsonNode.get("result").get(pair.toUpperCase());
+            if(null!=orderBookNode){
+                Long timestamp=null;
+                ArrayNode asksArray=(ArrayNode)orderBookNode.get("asks");
+                if(null!=asksArray){
+                    List<PriceAndVolume> asks=new ArrayList<>();
+                    for (JsonNode askItem:asksArray){
+                        ArrayNode askItemArray=(ArrayNode)askItem;
+                        PriceAndVolume priceAndVolume=new PriceAndVolume(DataUtils.objToBigDecimal(askItemArray.get(0)),DataUtils.objToBigDecimal(askItemArray.get(1)));
+                        asks.add(priceAndVolume);
+                        if(null==timestamp){
+                            timestamp=DataUtils.objToLong(askItemArray.get(2)+"000");
+                        }
+                    }
+                    if(asks.size()>20){
+                        asks=asks.subList(0,20);
+                    }
+                    orderBook.setAsks(asks);
+                }
+                ArrayNode bidsArray=(ArrayNode)orderBookNode.get("bids");
+                if(null!=bidsArray){
+                    List<PriceAndVolume> bids=new ArrayList<>();
+                    for (JsonNode bidItem:bidsArray){
+                        ArrayNode bidItemArray=(ArrayNode)bidItem;
+                        PriceAndVolume priceAndVolume=new PriceAndVolume(DataUtils.objToBigDecimal(bidItem.get(0)),DataUtils.objToBigDecimal(bidItem.get(1)));
+                        bids.add(priceAndVolume);
+                        if(null==timestamp){
+                            timestamp=DataUtils.objToLong(bidItemArray.get(2)+"000");
+                        }
+                    }
+                    if(bids.size()>20){
+                        bids=bids.subList(0,20);
+                    }
+                    orderBook.setBids(bids);
+                }
+                orderBook.setTimestamp(timestamp);
+            }
+            return orderBook;
+        });
     }
 }

@@ -1,9 +1,6 @@
 package com.adev.gather.exchange.bitbank;
 
-import com.adev.common.base.domian.Kline;
-import com.adev.common.base.domian.OrderBook;
-import com.adev.common.base.domian.Ticker;
-import com.adev.common.base.domian.Trade;
+import com.adev.common.base.domian.*;
 import com.adev.common.base.utils.DataUtils;
 import com.adev.common.base.utils.TimeUtils;
 import com.adev.common.exchange.StreamingMarketDataService;
@@ -18,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.reactivex.Observable;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -134,8 +132,53 @@ public class BitbankStreamingMarketDataService implements StreamingMarketDataSer
         throw new NotYetImplementedForExchangeException();
     }
 
+    /**
+     * 请求示例 ： https://public.bitbank.cc/eth_btc/depth 返回格式 ： { "success":1, "data":{ "asks":[ [ "0.03151996", "0.4539" ]],"bids":[ [ "0.03151995", "18.4493" ]]}}
+     */
     @Override
     public Observable<OrderBook> getOrderBook(String currencyPair, Object... args) {
-        throw new NotYetImplementedForExchangeException();
+        String url="https://public.bitbank.cc/"+currencyPair.replace("-","_")+"/depth";
+        RequestParam requestParam=new RequestParam();
+        requestParam.setUrl(url);
+        return httpStreamingService.pollingRestApi(requestParam).map(s -> {
+            OrderBook orderBook=new OrderBook();
+            orderBook.setExchange("bitbank");
+            orderBook.setCurrencyPair(currencyPair);
+            JsonNode jsonNode = mapper.readTree(s);
+            String successCode=jsonNode.findValue("success").asText();
+            if("1".equalsIgnoreCase(successCode)) {
+                JsonNode dataNode=jsonNode.get("data");
+                if(null!=dataNode){
+                    orderBook.setTimestamp(DataUtils.objToLong(dataNode.get("timestamp")));
+                    ArrayNode asksArray=(ArrayNode)dataNode.get("asks");
+                    if(null!=asksArray){
+                        List<PriceAndVolume> asks=new ArrayList<>();
+                        for (JsonNode askItem:asksArray){
+                            ArrayNode askItemArray=(ArrayNode)askItem;
+                            PriceAndVolume priceAndVolume=new PriceAndVolume(DataUtils.objToBigDecimal(askItemArray.get(0)),DataUtils.objToBigDecimal(askItemArray.get(1)));
+                            asks.add(priceAndVolume);
+                        }
+                        if(asks.size()>20){
+                            asks=asks.subList(0,20);
+                        }
+                        orderBook.setAsks(asks);
+                    }
+                    ArrayNode bidsArray=(ArrayNode)dataNode.get("bids");
+                    if(null!=bidsArray){
+                        List<PriceAndVolume> bids=new ArrayList<>();
+                        for (JsonNode bidItem:bidsArray){
+                            ArrayNode bidItemArray=(ArrayNode)bidItem;
+                            PriceAndVolume priceAndVolume=new PriceAndVolume(DataUtils.objToBigDecimal(bidItemArray.get(0)),DataUtils.objToBigDecimal(bidItemArray.get(1)));
+                            bids.add(priceAndVolume);
+                        }
+                        if(bids.size()>20){
+                            bids=bids.subList(0,20);
+                        }
+                        orderBook.setBids(bids);
+                    }
+                }
+            }
+            return orderBook;
+        });
 }
 }

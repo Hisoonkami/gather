@@ -1,19 +1,14 @@
 package com.adev.gather.service.impl;
 
 import com.adev.common.base.domian.Kline;
+import com.adev.common.base.domian.OrderBook;
 import com.adev.common.base.domian.Ticker;
 import com.adev.common.base.domian.Trade;
 import com.adev.common.exchange.StreamingExchange;
 import com.adev.common.exchange.StreamingExchangeFactory;
 import com.adev.gather.config.SubscribeConfig;
-import com.adev.gather.domain.CurrencyPair;
-import com.adev.gather.domain.KlineHistory;
-import com.adev.gather.domain.PairTicker;
-import com.adev.gather.domain.TradeHistory;
-import com.adev.gather.repository.CurrencyPairRepository;
-import com.adev.gather.repository.KlineHistoryRepository;
-import com.adev.gather.repository.TickerRepository;
-import com.adev.gather.repository.TradeHistoryRepository;
+import com.adev.gather.domain.*;
+import com.adev.gather.repository.*;
 import com.adev.gather.service.SubscribeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +30,9 @@ public class SubscribeServiceImpl implements SubscribeService {
     @Autowired
     private KlineHistoryRepository klineHistoryRepository;
 
+    @Autowired
+    private OrderBookRepository orderBookRepository;
+
     @Override
     public void subscribe(SubscribeConfig.SubscribeExchange exchange) {
         List<CurrencyPair> currencyPairs=currencyPairRepository.findByExchange(exchange.getName());
@@ -50,6 +48,9 @@ public class SubscribeServiceImpl implements SubscribeService {
                     });
                     streamingExchange.getStreamingMarketDataService().getCurrentKLine(currencyPair.getPairName()).subscribe(kline -> {
                         handleKline(kline);
+                    });
+                    streamingExchange.getStreamingMarketDataService().getOrderBook(currencyPair.getPairName()).subscribe(orderBook -> {
+                        handleOrderBook(orderBook);
                     });
                 }
             }
@@ -86,6 +87,15 @@ public class SubscribeServiceImpl implements SubscribeService {
         if(null==klineHistory){
             klineHistory=new KlineHistory(kline);
             klineHistoryRepository.save(klineHistory);
+        }
+    }
+
+    private void handleOrderBook(OrderBook orderBook){
+        String id=orderBook.getExchange()+":"+orderBook.getCurrencyPair();
+        PairOrderBook pairOrderBook=orderBookRepository.findById(id).orElse(null);
+        if(null==pairOrderBook||pairOrderBook.getTimestamp().compareTo(orderBook.getTimestamp())<0){//不存在或者比当前数据更老就更新
+            pairOrderBook=new PairOrderBook(orderBook);
+            orderBookRepository.save(pairOrderBook);
         }
     }
 }
