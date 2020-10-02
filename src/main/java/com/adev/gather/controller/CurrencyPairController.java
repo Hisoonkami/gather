@@ -38,4 +38,15 @@ public class CurrencyPairController {
     public ResponseEntity<BaseResult> findByExchange(@RequestParam(value = "exchange") String exchange){
         return ResponseEntity.ok(BaseResult.success(currencyPairService.findByExchange(exchange)));
     }
+
+    @RequestMapping(value = {"/search"},method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<BaseResult> searcCurrencyPair(@RequestParam(value = "pairName",required = false)String pairName,
+                                                        @RequestParam(value = "exchangeName",required = false)String exchangeName,
+                                                        @RequestParam(value = "currencySymbol",required = false)String currencySymbol,
+                                                        @RequestParam(value = "page",required = false,defaultValue = "0")Integer page,
+                                                        @RequestParam(value = "size",required = false,defaultValue = "15")Integer size,
+                                                        @RequestParam(value = "sort",required = false)String sort){
+        return ResponseEntity.ok(BaseResult.success(currencyPairService.searchCurrencyPair(pairName,exchangeName,currencySymbol,page,size,sort)));
+    }
 }
