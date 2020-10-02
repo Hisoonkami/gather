@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
-@Table(name = "exchange")
+@Table(name = "currency")
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
@@ -57,19 +57,7 @@ public class Currency extends EntityBase {
     private String logo;//图标地址
 
     @Column
-    private BigDecimal total_supply;
+    private BigDecimal total_supply; //总市值
     @Column
-    private BigDecimal max_supply;
-
-    @LastModifiedDate
-    private Date lastModifiedDate;
-
-    @LastModifiedBy
-    private String lastModifiedBy;
-
-    @CreatedDate
-    private Date createdDate;
-
-    @CreatedBy
-    private String createdBy;
+    private BigDecimal max_supply;//最大发行量
 }

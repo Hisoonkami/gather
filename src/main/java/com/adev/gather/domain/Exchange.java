@@ -1,5 +1,6 @@
 package com.adev.gather.domain;
 
+import com.adev.common.base.domian.EntityBase;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,30 +16,20 @@ import java.util.Date;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
-public class Exchange {
-    @Version
-    @JsonIgnore
-    private Long version;
-
+public class Exchange extends EntityBase {
     @Id
     @GeneratedValue
     private Long id;
 
-    private String name;
+    private String name; //交易所名称，传参使用
 
-    private String showName;
+    private String showName;//交易所显示名称
 
-    private String level;
+    private String level;//交易所级别
 
-    private String logo;
+    private String logo;//图标
 
-    private String website;
+    private String website;//网站
 
-    private String setupYear;
-
-    @LastModifiedDate
-    private Date lastModifiedDate;
-
-    @LastModifiedBy
-    private String lastModifiedBy;
+    private String setupYear;//成立年份
 }

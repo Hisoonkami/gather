@@ -1,5 +1,6 @@
 package com.adev.gather.domain;
 
+import com.adev.common.base.domian.EntityBase;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,11 +18,7 @@ import java.util.Date;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
-public class CurrencyPair {
-    @Version
-    @JsonIgnore
-    private Long version;
-
+public class CurrencyPair extends EntityBase {
     @Id
     @GeneratedValue
     private Long id;
@@ -33,16 +30,4 @@ public class CurrencyPair {
     private String currency;
 
     private String counterName;
-
-    @LastModifiedDate
-    private Date lastModifiedDate;
-
-    @LastModifiedBy
-    private String lastModifiedBy;
-
-    @CreatedDate
-    private Date createdDate;
-
-    @CreatedBy
-    private String createdBy;
 }
