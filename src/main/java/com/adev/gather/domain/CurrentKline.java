@@ -14,13 +14,15 @@ import javax.persistence.Id;
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode(callSuper = false)
-@RedisHash(value = "current_kline", timeToLive = -1)
+@RedisHash(value = "current_kline", timeToLive = 86400000)
 public class CurrentKline extends Kline {
 
     @Id
     private String id;
 
     public CurrentKline(Kline kline) {
+        String id=kline.getExchange()+":"+kline.getCurrencyPair()+":"+kline.getTimestamp();
+        this.setId(id);
         DataUtils.copyFatherAttribute(kline,this);
     }
 }

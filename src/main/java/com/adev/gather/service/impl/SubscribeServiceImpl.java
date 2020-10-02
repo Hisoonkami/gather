@@ -33,6 +33,12 @@ public class SubscribeServiceImpl implements SubscribeService {
     @Autowired
     private OrderBookRepository orderBookRepository;
 
+    @Autowired
+    private CurrentTradeRepository currentTradeRepository;
+
+    @Autowired
+    private CurrentKlineRepository currentKlineRepository;
+
     @Override
     public void subscribe(SubscribeConfig.SubscribeExchange exchange) {
         List<CurrencyPair> currencyPairs=currencyPairRepository.findByExchange(exchange.getName());
@@ -76,17 +82,25 @@ public class SubscribeServiceImpl implements SubscribeService {
 
     private void handleTrade(Trade trade){
         TradeHistory tradeHistory=tradeHistoryRepository.findFirstByExchangeAndTradeId(trade.getExchange(),trade.getTradeId());
-        if(null==tradeHistory){
+        if(null==tradeHistory){//保存历史交易记录
             tradeHistory=new TradeHistory(trade);
             tradeHistoryRepository.save(tradeHistory);
+        }
+        CurrentTrade currentTrade=new CurrentTrade(trade);
+        if(!currentTradeRepository.existsById(currentTrade.getId())){//保存最近的交易记录
+            currentTradeRepository.save(currentTrade);
         }
     }
 
     private void handleKline(Kline kline){
         KlineHistory klineHistory=klineHistoryRepository.findFirstByExchangeAndCurrencyPairAndTimestamp(kline.getExchange(),kline.getCurrencyPair(),kline.getTimestamp());
-        if(null==klineHistory){
+        if(null==klineHistory){//保存历史k线
             klineHistory=new KlineHistory(kline);
             klineHistoryRepository.save(klineHistory);
+        }
+        CurrentKline currentKline=new CurrentKline(kline);
+        if(!currentKlineRepository.existsById(currentKline.getId())){//保存最新k线
+            currentKlineRepository.save(currentKline);
         }
     }
 
