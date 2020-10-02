@@ -25,6 +25,9 @@ spring:
 server:
   port: 8090
 
+---
+spring:
+  profiles: test
 # eureka客户端配置
 eureka:
   instance:
@@ -37,7 +40,7 @@ eureka:
   client:
     serviceUrl:
       # 注册中心地址
-      defaultZone: http://eureka1:8761/eureka/,http://eureka2:8762/eureka/
+      defaultZone: http://adev.top:8761/eureka/,http://adev.top:8762/eureka/
 
 #定于交易所信息
 subscribe:
@@ -50,5 +53,32 @@ subscribe:
   exchanges[2]:
     name: kraken
     class-name: com.adev.gather.exchange.kraken.KrakenStreamingExchange
+---
+spring:
+  profiles: dev
+# eureka客户端配置
+eureka:
+  instance:
+    # 使用 ip 代替实例名
+    prefer-ip-address: true
+    # 实例的主机名
+    hostname: ${spring.cloud.client.ip-address}
+    # 实例的 ID 规则
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+  client:
+    serviceUrl:
+      # 注册中心地址
+      defaultZone: http://127.0.0.1:8761/eureka/
 
+#定于交易所信息
+subscribe:
+  exchanges[0]:
+    name: coinone
+    class-name: com.adev.gather.exchange.coinone.CoinoneStreamingExchange
+  exchanges[1]:
+    name: bitbank
+    class-name: com.adev.gather.exchange.bitbank.BitbankStreamingExchange
+  exchanges[2]:
+    name: kraken
+    class-name: com.adev.gather.exchange.kraken.KrakenStreamingExchange
       

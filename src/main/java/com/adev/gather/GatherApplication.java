@@ -11,7 +11,6 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 @EnableEurekaClient
 @EnableJpaAuditing
 @EnableMongoAuditing
-@ComponentScan
 public class GatherApplication {
 
 	public static void main(String[] args) {
