@@ -8,4 +8,6 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 @RepositoryRestResource
 public interface TradeHistoryRepository extends MongoRepository<TradeHistory,ObjectId> {
     TradeHistory findFirstByExchangeAndTradeId(String exchange,Long tradeId);
+
+    void deleteByTimestampBefore(String exchange,Long timestamp);
 }

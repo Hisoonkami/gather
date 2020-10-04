@@ -19,6 +19,12 @@ spring:
   data:
     mongodb:
       uri: mongodb://admin:adev.top@adev.top:27017/adev_gather
+  rabbitmq:
+    host: adev.top
+    port: 5672
+    virtual-host: adev_vhost
+    username: admin
+    password: adev.top
   main:
     allow-bean-definition-overriding: true
 # 应用服务web访问端口
